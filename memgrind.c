@@ -194,9 +194,6 @@ int main(int argc, char**argv)
 
     //Now we allocate a chunk that is too large for the remaining space. It doesn't work, which is intended.
     char *p = malloc(17);
-
-    //This print statement is included so the compiler doesn't think we declared char *p for no reason and give us an error.
-    printf("%s",p); 
    
     for(int i=0;i<128;i++){ //Now we can free the task 5 demonstration array.
         if(i%2 == 0)
