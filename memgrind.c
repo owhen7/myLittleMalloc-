@@ -13,7 +13,7 @@ int main(int argc, char**argv)
     int count = 0;
 
     while(count!=50){
-   
+
 
     //TASK-1 Starts Here
      clock_t begin = clock();
@@ -47,9 +47,9 @@ int main(int argc, char**argv)
     end = clock(); //timer ends
 
     time_spent[1][count] += (double)(end - begin) / CLOCKS_PER_SEC;
-    
+
     //TASK-3 Starts Here
-    begin = clock(); 
+    begin = clock();
     int mallocCount = 0;
     int arrayIndex = 0;
     char *r[120];
@@ -71,12 +71,12 @@ int main(int argc, char**argv)
         free(r[arrayIndex-1]);
         arrayIndex--;
     }
-    
+
     end = clock();
 
     time_spent[2][count] += (double)(end - begin) / CLOCKS_PER_SEC;
 
- 	
+
 	//TASK-4 Starts here.
 	begin = clock();
 	char *task4[120];
@@ -110,7 +110,7 @@ int main(int argc, char**argv)
 	}
 	for(int i = 0; i < 60; i++)
 	{
-		task5[i] = malloc(5); //Declare the first 60 pointers again at size 5. 
+		task5[i] = malloc(5); //Declare the first 60 pointers again at size 5.
 	}
 	for(int i = 0; i < 120; i++) //Free all memory.
 	{
@@ -119,8 +119,8 @@ int main(int argc, char**argv)
 
 	end = clock();
 	time_spent[4][count] += (double)(end - begin) / CLOCKS_PER_SEC;
-	
-    count++; //After finishing and recording all 5 tasks, now we move to the next trial. 
+
+    count++; //After finishing and recording all 5 tasks, now we move to the next trial.
 }
 	//Output our elegant scoreboard
 	printf("\n\n%58s","Time (in seconds)");
@@ -147,9 +147,9 @@ int main(int argc, char**argv)
 
 
 
-    	printf("\nMEMSIZE is currently %d bytes.\n", MEMSIZE);
-    	printf("The size of the metadata for each block of memory is currently %ld bytes.\n", sizeof(header));
-    	
+    	printf("\n\nMEMSIZE is currently %d bytes.\n", MEMSIZE);
+    	printf("\nThe size of the metadata for each block of memory is currently %ld bytes.\n", sizeof(header));
+
 	//Feb23 Lecture Mini-Task 1: Allocate all memory, then try to allocate more.
 	printf("\nMini-task 1. Allocating all memory, then trying to allocate more...\n");
 	char *miniTask1[2];
@@ -177,7 +177,7 @@ int main(int argc, char**argv)
 	//Feb23 Lecture Mini-Task 4: Free an address that isn't at the start of a chunk.
 	printf("\nMini-task 4. Freeing an address that isn't at the start of a chunk...\n");
 	char* miniTask4 = malloc(100);
-	
+
 	free(miniTask4 + 2); //Freeing an address in the middle of a chunk does not work, as intended.
 
 	free(miniTask4);
@@ -194,7 +194,10 @@ int main(int argc, char**argv)
 
     //Now we allocate a chunk that is too large for the remaining space. It doesn't work, which is intended.
     char *p = malloc(17);
-   
+
+    //This print statement is included so the compiler doesn't think we declared char *p for no reason and give us an error.
+    printf("\nThe value of p is %s\n",p);
+
     for(int i=0;i<128;i++){ //Now we can free the task 5 demonstration array.
         if(i%2 == 0)
             free(miniTask5[i]);
