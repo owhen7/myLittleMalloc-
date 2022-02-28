@@ -2,31 +2,6 @@
 #include <stdlib.h>
 #include "mymalloc.h"
 
-void insertAfter(struct header** prev_node, size_t* new_size, int old_size)
-{
-    /*1. check if the given prev_node is NULL */
-    /*if (prev_node == NULL)
-    {
-    printf("the given previous node cannot be NULL");
-    return;
-    }*/
-
-    /* 2. allocate new node */
-    struct header* new_node =(struct header*) malloc(sizeof(struct header));
-
-    /* 3. put in the data */
-    new_node->length = (old_size-(*new_size))-sizeof(struct header);
-    new_node->isFree = 1;
-
-    /* 4. Make next of new node as next of prev_node */
-    new_node->next = (*prev_node)->next;
-
-    /* 5. move the next of prev_node as new_node */
-    (*prev_node)->next = new_node;
-
-    return;
-
-}
 
 static char memory[MEMSIZE];
 
@@ -139,21 +114,39 @@ void myfree(void *p, char *file, int line)
         printf("\nInvalid pointer %p at %s:%d\n", p, file, line);
         return;
     }
-    header *prev_metablock = (header*)(p-sizeof(struct header));
+
+    header *prev_metablock = (header*)(p - (int)sizeof(struct header));
 
     if(!(prev_metablock->isFree))
-    prev_metablock->isFree = 1;
+        prev_metablock->isFree = 1;
     else
+    {
         printf("\nInvalid pointer %p at %s:%d\n", p, file, line);
-        /*header* adjacent_metablock = (header*)(prev_metablock+prev_metablock->length+sizeof(struct header));
-        if(adjacent_metablock->isFree){
-            prev_metablock->length = sizeof(struct header) + adjacent_metablock->length;
+        return;
+    }
+
+        header* adjacent_metablock = prev_metablock->next;
+        //header* adjacent_metablock = (header*)(addressPrevMetaBlock + (int)sizeof(struct header) + prev_metablock->length);
+        if(adjacent_metablock->isFree && adjacent_metablock!=startPoint){
+            prev_metablock->length += sizeof(struct header) + adjacent_metablock->length;
+            prev_metablock->next = adjacent_metablock->next;
             adjacent_metablock = NULL;
         }
-        adjacent_metablock = (header*)(prev_metablock - sizeof(struct header));
-        if(adjacent_metablock->isFree){
-            adjacent_metablock->length = sizeof(struct header) + prev_metablock->length;
+
+        header* current = startPoint;
+        while(current && !(((current)->isFree) && ((current)->next)==prev_metablock && ((current)->next)!=startPoint)) {
+
+        //if it is last chunk
+        if((current)->next == startPoint){
+        return;
+        }
+        //go to next link
+        current = (current)->next;
+        }
+
+            current->length = current->length + sizeof(struct header) + prev_metablock->length;
+            current->next = prev_metablock->next;
             prev_metablock = NULL;
-        }*/
-    //printf("free was called from %s:%d\n", file, line);
-}
+
+      }
+
