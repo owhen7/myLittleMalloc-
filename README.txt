@@ -25,7 +25,3 @@ Here are the Mini-Tests. They are performed only once and were constructed based
 3. Attempt to free an address that is outside the range of MEMSIZE.
 4. Attempt to free an address that isn't the start of a chunk.
 5. Attempt allocate memory when gaps exist, but which are not large enough to fit the memory allocated.
-
-
-Miscellaneous Notes:
-It was unclear if any additional tests had to be repeated 50 times each.
