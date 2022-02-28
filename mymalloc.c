@@ -2,76 +2,69 @@
 #include <stdlib.h>
 #include "mymalloc.h"
 
-
+//creating static memory array that will act as our memory location to dynamically allocate data
 static char memory[MEMSIZE];
 
+//a void pointer that acts as a head pointer of our linked list
 void* startPoint = (header *)(memory);
-//*(header *)memory = (header){(int)(MEMSIZE - sizeof(struct header)), 1, NULL};
-//*(header *)memory = (header){NULL, 0, NULL};
-/*struct header *startPoint = (header*)memory;
-(header*)startPoint->isFree = 1;
-(header*)startPoint->length = (MEMSIZE - sizeof(struct header));
-(header*)startPoint->next = startPoint;
-*/
-//insertAfter((sizeof(memory) - sizeof(struct header)),startPoint->length);
-//startPoint = (struct header*)memory;
 
-//((header*)startPoint)->length = (sizeof(memory) - sizeof(struct header));
-//startPoint = insertAfter(startPoint,(sizeof(memory) - sizeof(struct header)),startPoint->length)
-//startPoint = (header*){ (MEMSIZE - sizeof(struct header)), 1, startPoint};
-/*->length = (MEMSIZE - sizeof(struct header));
-startPoint.current->isFree = 1;
-startPoint.current->next = current;*/
-//startPoint = startPoint->next;
-
-//header current;
-
-
+//starting mymalloc() method here
 void *mymalloc(size_t size, char *file, int line)
 {
-    //start from the first chunk
+    //start from the head pointer (start of memory)
     header* current = startPoint;
-   //if the first chunk is free i.e. current is NULL yet
+   //if the malloc() is being called the first time i.e. current is NULL yet
    if((current)->next == NULL) {
 
+        //if the requested size is less than available memory space
         if(size<(MEMSIZE-sizeof(struct header))){
+
+            //if a valid free chunk is found, set it to NOT FREE
             (current)->isFree = 0;
+
             void* addressCurrent = current;
 
-            struct header* new_node = (header*)(addressCurrent + (int)(sizeof(struct header) + size));
-
+            //check if meta-data node can be allocated
             if((MEMSIZE - size)>sizeof(struct header))
                 {
-                    /* 2. allocate new node */
+                    //create new meta-data node to track the memory address and space availability
+                    struct header* new_node = (header*)(addressCurrent + (int)(sizeof(struct header) + size));
 
-                    /* 3. put in the data */
+                    /* put in the data */
                     (new_node)->length = (MEMSIZE - size - sizeof(struct header)) - sizeof(struct header);
                     (new_node)->isFree = 1;
 
-                    /* 4. Make next of new node as next of prev_node */
+                    /* Make next of new node as next of prev_node */
                     (new_node)->next = current;
 
-                    /* 5. move the next of prev_node as new_node */
+                    /* move the next of prev_node as new_node */
                     (current)->next = new_node;
-                    //insertAfter(&current, &size, MEMSIZE);
+
+                    /* set the length of allocated meta-data node equal to the requested size */
                     (current)->length = size;
                 }
+                /* else return more than size requested as there is not enough space for us to make a new meta-data node */
             else{
                     (current)->next = current;
                     (current)->length = MEMSIZE-sizeof(struct header);
                 }
+
+            //return the address for client i.e. the payload address = address of block right after the end of meta-data node
             return (current+1);
         }
+
+        /* else if the requested size is more than available memory space then return NULL */
         else{
             printf("\nOut of Space: Cannot Allocate Memory at %s:%d\n", file, line);
             return NULL;
         }
    }
-    //header** last;
-   //navigate through complete memory until a free block of required size is found
+
+    //if the linked list has already been initialized i.e. malloc() was previously called
+    //navigate through complete memory until a free block of required size is found
    while(current && !(((current)->isFree) && ((current)->length)>=size)) {
 
-      //if it is last chunk
+        //if it is last chunk and no valid free chunk is found then return NULL
         if((current)->next == startPoint){
         printf("\nOut of Space: Cannot Allocate Memory at %s:%d\n", file, line);
         return NULL;
@@ -80,37 +73,38 @@ void *mymalloc(size_t size, char *file, int line)
         current = (current)->next;
       }
 
-   //if a valid free chunk is found
-   //return the address of that chunk for client
+   //if a valid free chunk is found, set it to NOT FREE
    (current)->isFree = 0;
+
+   //check if meta-data node can be allocated
    if((((current)->length) - size)>sizeof(struct header))
    {
-       /* 2. allocate new node */
-    char* addressCurrent = (char*)current;
-    struct header* new_node =(struct header*)(addressCurrent + sizeof(struct header) + size);
+        //create new meta-data node to track the memory address and space availability
+        char* addressCurrent = (char*)current;
+        struct header* new_node =(struct header*)(addressCurrent + sizeof(struct header) + size);
 
-    /* 3. put in the data */
-    (new_node)->length = (((current)->length)-size)-sizeof(struct header);
-    (new_node)->isFree = 1;
+        /* put in the data */
+        (new_node)->length = (((current)->length)-size)-sizeof(struct header);
+        (new_node)->isFree = 1;
 
-    /* 4. Make next of new node as next of prev_node */
-    (new_node)->next = (current)->next;
+        /* Make next of new node as next of prev_node */
+        (new_node)->next = (current)->next;
 
-    /* 5. move the next of prev_node as new_node */
-    ((current)->next) = new_node;
-        //insertAfter(&current, &size, (int)current->length);
-    (current)->length = (int)size;
+        /* move the next of prev_node as new_node */
+        ((current)->next) = new_node;
+
+        /* set the length of allocated meta-data node equal to the requested size */
+        (current)->length = (int)size;
    }
 
+   //return the address for client i.e. the payload address = address of block right after the end of meta-data node
    return (current+1);
-
-    //printf("Mymalloc was called from %s:%d\n", file, line);
 }
 
 
 void myfree(void *p, char *file, int line)
 {
-    if(!p){
+    if(!p || p>=startPoint+4096){
         printf("\nInvalid pointer %p at %s:%d\n", p, file, line);
         return;
     }
@@ -126,7 +120,6 @@ void myfree(void *p, char *file, int line)
     }
 
         header* adjacent_metablock = prev_metablock->next;
-        //header* adjacent_metablock = (header*)(addressPrevMetaBlock + (int)sizeof(struct header) + prev_metablock->length);
         if(adjacent_metablock->isFree && adjacent_metablock!=startPoint){
             prev_metablock->length += sizeof(struct header) + adjacent_metablock->length;
             prev_metablock->next = adjacent_metablock->next;
