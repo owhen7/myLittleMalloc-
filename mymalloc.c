@@ -104,13 +104,16 @@ void *mymalloc(size_t size, char *file, int line)
 
 void myfree(void *p, char *file, int line)
 {
-    if(!p || p>=startPoint+4096){
+    //Check if a valid pointer is passed, i.e. pointer address should not be more than the last address of our memory array
+    if(!p || p>= (startPoint + MEMSIZE)){
         printf("\nInvalid pointer %p at %s:%d\n", p, file, line);
         return;
     }
 
+    //get the previous meta-data block
     header *prev_metablock = (header*)(p - (int)sizeof(struct header));
 
+    //check if pointer passed is valid i.e. it should not have been freed already
     if(!(prev_metablock->isFree))
         prev_metablock->isFree = 1;
     else
@@ -119,13 +122,17 @@ void myfree(void *p, char *file, int line)
         return;
     }
 
+        //get the meta-block right next to the previous meta-block
         header* adjacent_metablock = prev_metablock->next;
+
+        //check if the adjacent right meta-block is free, if it is then coalesce
         if(adjacent_metablock->isFree && adjacent_metablock!=startPoint){
             prev_metablock->length += sizeof(struct header) + adjacent_metablock->length;
             prev_metablock->next = adjacent_metablock->next;
             adjacent_metablock = NULL;
         }
 
+        //iterate through the entire linked list to find a meta-block that is adjacent left to the prev_metablock and is Free.
         header* current = startPoint;
         while(current && !(((current)->isFree) && ((current)->next)==prev_metablock && ((current)->next)!=startPoint)) {
 
@@ -137,6 +144,8 @@ void myfree(void *p, char *file, int line)
         current = (current)->next;
         }
 
+
+            //if a free block is found adjacent left to prev_metablock, then coalesce
             current->length = current->length + sizeof(struct header) + prev_metablock->length;
             current->next = prev_metablock->next;
             prev_metablock = NULL;
