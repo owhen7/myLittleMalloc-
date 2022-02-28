@@ -19,18 +19,12 @@ Here are the five tests:
 5. Allocate 120 chunks of 1 byte memory, then free only half of them, and reallocate 60 more 2-byte chunks. Then free everything. x50
 
 
-
-I DID NOT END UP CODING THESE MINI TESTS IN THE CURRENT STATE OF THE PROGRAM. THEY ARE COMMENTED OUT.
-Here are the Mini-Tests, constructed based on a lecture that Menendez gave on February 23rd.
+Here are the Mini-Tests. They are performed only once and were constructed based on a lecture that Menendez gave on February 23rd.
 1. Allocate all memory, then try to allocate more.
 2. Allocate more memory than exists in total.
 3. Attempt to free an address that is outside the range of MEMSIZE.
 4. Attempt to free an address that isn't the start of a chunk.
-5. Attempt allocate memory when gaps exist, but which are not large enough to fit the memory allocated. (CAN DELETE THIS LAST MINITASK)
-
-
-
-
+5. Attempt allocate memory when gaps exist, but which are not large enough to fit the memory allocated.
 
 
 Miscellaneous Notes:
